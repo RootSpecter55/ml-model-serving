@@ -76,6 +76,7 @@ class TrainingService:
                 pipeline=result.pipeline,
                 input_example=result.input_example,
                 tags={"model_name": name, "training_run_id": str(run.id)},
+                trusted_types=trainer.TRUSTED_TYPES[request.algorithm],
             )
             async with self._db.transaction() as session:
                 version = await self._registry.register(

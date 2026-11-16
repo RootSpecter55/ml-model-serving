@@ -30,10 +30,13 @@ class Container:
     predictions: PredictionsController
 
 
-def build_container(settings: Settings) -> Container:
-    """Composition root: wires every repository, service and controller in one place."""
+def build_container(settings: Settings, tracker: ExperimentTracker | None = None) -> Container:
+    """Composition root: wires every repository, service and controller in one place.
+
+    `tracker` can be passed in (tests use one that fails, to check failed runs are recorded).
+    """
     db = Database(get_engine())
-    tracker = ExperimentTracker(
+    tracker = tracker or ExperimentTracker(
         settings.mlflow_tracking_uri, settings.mlflow_experiment, settings.mlflow_artifact_location
     )
     cache = ModelCache(tracker.load_model)

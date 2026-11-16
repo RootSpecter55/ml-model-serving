@@ -55,6 +55,14 @@ ALGORITHMS: dict[str, tuple[type[BaseModel], Callable[[Any, int], Pipeline]]] = 
 }
 
 
+# Models are saved with skops, which refuses to load internal scikit-learn types unless they are
+# listed as trusted. Tree models need sklearn's Tree type. Only this service creates these files.
+TRUSTED_TYPES: dict[str, list[str]] = {
+    "logistic_regression": [],
+    "random_forest": ["sklearn.tree._tree.Tree"],
+}
+
+
 def validate_params(algorithm: str, params: dict[str, Any]) -> dict[str, Any]:
     """Validates hyperparameters for the algorithm and fills in defaults. Raises ValueError."""
     if algorithm not in ALGORITHMS:

@@ -45,14 +45,21 @@ class ExperimentTracker:
         pipeline: Pipeline,
         input_example: Any,
         tags: dict[str, str],
+        trusted_types: list[str],
     ) -> LoggedRun:
         with mlflow.start_run(experiment_id=self._get_experiment_id(), run_name=run_name) as run:
             mlflow.log_params(params)
             mlflow.log_metrics(metrics)
             mlflow.set_tags(tags)
-            info = mlflow.sklearn.log_model(pipeline, name="model", input_example=input_example)
+            info = mlflow.sklearn.log_model(
+                pipeline,
+                name="model",
+                input_example=input_example,
+                # Stored with the model and reused when loading it.
+                skops_trusted_types=trusted_types or None,
+            )
         return LoggedRun(run_id=run.info.run_id, model_uri=info.model_uri)
 
     def load_model(self, model_uri: str) -> Pipeline:
-        # Loading deserialises a pickle: only load models this service logged itself.
+        # Only types declared trusted at save time can be deserialised (skops format).
         return mlflow.sklearn.load_model(model_uri)
