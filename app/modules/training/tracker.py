@@ -21,7 +21,8 @@ class ExperimentTracker:
     def __init__(self, tracking_uri: str, experiment: str, artifact_location: str | None) -> None:
         mlflow.set_tracking_uri(tracking_uri)
         self._experiment = experiment
-        self._artifact_location = artifact_location
+        # Empty means "let the tracking server decide" (a server with --serve-artifacts).
+        self._artifact_location = artifact_location or None
         self._experiment_id: str | None = None
 
     def _get_experiment_id(self) -> str:
